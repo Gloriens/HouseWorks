@@ -1,98 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:house/main.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+
+class Homes extends StatefulWidget {
+  String evIsmi;
+  List<String> insanListesi;
+
+  Homes({Key? key, required this.evIsmi, required this.insanListesi}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Homes> createState() => _HomesState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomesState extends State<Homes> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            ElevatedButton(onPressed: (){
-
-            },
-                child:
-                Text('Create Home'),
-            ),
-            ElevatedButton(onPressed: (){
-              
-            },
-                child: Text(
-                  'MyHomes'
-                ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CreateHome extends StatefulWidget {
-  const CreateHome({super.key});
-
-  @override
-  State<CreateHome> createState() => _CreateHomeState();
-}
-
-class _CreateHomeState extends State<CreateHome> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home Page'),
-        backgroundColor: Color(0xFF8a2be2),
-      ),
-      floatingActionButton: Container(
-        width: 65,
-        height: 65,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => MyHomePage(title: ('Home Page')),
-              ),
-            );
-          },
-          backgroundColor: Color(0xFF8a2be2),
-          elevation: 0,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      resizeToAvoidBottomInset: false,
-      bottomNavigationBar: BottomAppBar(
-        color: Color(0xFF8a2be2),
-        shape: CircularNotchedRectangle(),
-        child: Container(
-          height: 50.0,
-        ),
-      ),
-    );
-  }
-}
-
-class MyHomes extends StatefulWidget {
-  const MyHomes({super.key});
-
-  @override
-  State<MyHomes> createState() => _MyHomesState();
-}
-
-class _MyHomesState extends State<MyHomes> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-
-    );
-
+    return const Placeholder();
   }
 }
 

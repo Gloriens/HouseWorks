@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:house/Homes.dart';
 
 void main() {
@@ -40,14 +42,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -68,7 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,84 +72,110 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.only(top: 180.0), // İstediğiniz miktarda yukarı çekmek için yukarı boşluk ekledik
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateHome()));
-                  },
-                child: SizedBox(
-                  width: 231,
-                  height: 80,
-                  child: Row(
-                    children: [
-                      SizedBox(width: 10,),
-                      Text('Create Home', style: TextStyle(
-                          fontSize: 17,color: Colors.white,
-                      ),
-                      ),
-                    ],
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF7E6C6C),
-                ),
-              ),
-              SizedBox(
-                height: 30,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomes()));
-                },
-                child: SizedBox(
-                  width: 231,
-                  height: 80,
-                  child: Row(
-                    children: [
-                      Icon(Icons.language, size: 50,),
-                      SizedBox(width: 10,),
-                      Text('My Homes', style: TextStyle(
-                          fontSize: 17,color: Colors.white,
-                      ),),
-                    ],
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xffF87575),
-                ),
-              ),
-            ],
-          ),
+
         ),
       ),
-      floatingActionButton: Container(
-        width: 65,
-        height: 65,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => MyHomePage(title: ('Home Page')),
-              ),
-            );
-          },
-          backgroundColor: Color(0xFF8a2be2),
-          elevation: 0,
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddHomeScreen()));
+        },
+        child: Icon(Icons.add), // Ikon eklemek için bu satırı kullanın
+        // veya
+        // child: Icon(CupertinoIcons.add), // Cupertino ikonu eklemek için bu satırı kullanın
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Sağ alt köşede görünecek
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: BottomAppBar(
+        height: 40.0,
         color: Color(0xFF8a2be2),
         shape: CircularNotchedRectangle(),
-        child: Container(
-          height: 50.0,
-        ),
+
       ),
     );
 
   }
 }
+
+
+class AddHomeScreen extends StatefulWidget {
+  @override
+  _AddHomeScreenState createState() => _AddHomeScreenState();
+}
+
+class _AddHomeScreenState extends State<AddHomeScreen> {
+  TextEditingController homnametext = TextEditingController();
+  TextEditingController peoplecounttext = TextEditingController();
+  List<Widget> additionalTextFields = [];
+  List<TextEditingController> personTextControllers = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Add Home'),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text("Give a name to your home", textAlign: TextAlign.start),
+            TextField(
+              controller: homnametext,
+              maxLength: 30,
+            ),
+            Text("Enter the total number of people you will do housework with, including yourself."),
+            TextField(
+              keyboardType: TextInputType.number,
+              controller: peoplecounttext,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                int peopleCount = int.tryParse(peoplecounttext.text) ?? 0;
+                personTextControllers = List.generate(peopleCount, (index) => TextEditingController());
+                //personTextControllers diye texteditingcontroller dan oluşan bir list yarattık. Şimdi ise o liste
+                //peoplecount kadar indexsine => texteditingController ekliyoruz
+
+                List<Widget> newTextFields = List.generate(
+                  peopleCount,
+                      (index) => TextField(
+                    decoration: InputDecoration(labelText: 'Person ${index + 1}'),
+                        controller: personTextControllers[index],
+
+                  ),
+                );
+
+
+                setState(() {
+                  additionalTextFields = newTextFields;
+                });
+              },
+              child: Text("OK"),
+            ),
+            ...additionalTextFields,
+
+            ElevatedButton(onPressed: (){
+              int peopleCount = int.tryParse(peoplecounttext.text) ?? 0;
+              List<String> people = [];
+              for(int i =0;i<peopleCount;i++){
+                people.add(personTextControllers[i].text);
+
+              }
+              String homname = homnametext.text;
+              Homes a = Homes(evIsmi: homname,insanListesi: people,);
+              for(int z=0; z<a.insanListesi.length;z++){
+                print(a.evIsmi);
+                print(a.insanListesi[z]);
+              }
+            },
+                child: Text("Print"))
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
