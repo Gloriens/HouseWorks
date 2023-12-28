@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "760700497317",
+    "project_id": "fir-connect-fb93c",
+    "storage_bucket": "fir-connect-fb93c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:760700497317:android:1db0b2dca3ae1c36198c4c",
+        "android_client_info": {
+          "package_name": "com.example.house"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCttPFY1_lEitGSqIMQk9k1T6U5hxFlXdk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

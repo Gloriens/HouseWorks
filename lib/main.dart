@@ -1,9 +1,32 @@
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:house/Homes.dart';
+import 'package:house/after_add_home_screen.dart';
 
+/*
 void main() {
+  runApp(const MyApp());
+}
+*/
+
+/*
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  runApp(const MyApp());
+}
+*/
+
+Future main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  if(kIsWeb) {
+    await Firebase.initializeApp(options: FirebaseOptions(apiKey: "AIzaSyBYWv3Gu03a32oLYKz0sYen2N3P-rZzjTQ", appId: "1:760700497317:web:d0b67534a2e52d38198c4c", messagingSenderId: "760700497317", projectId: "fir-connect-fb93c"));
+  }
+
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -35,6 +58,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Home Page'),
+      // home: const AfterAddHomeScreen(),
     );
   }
 }
@@ -62,6 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +170,6 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
 
                   ),
                 );
-
 
                 setState(() {
                   additionalTextFields = newTextFields;
