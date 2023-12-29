@@ -58,14 +58,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Home Page'),
-      // home: const AfterAddHomeScreen(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
 
   final String title;
 
@@ -132,9 +130,10 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
   TextEditingController peoplecounttext = TextEditingController();
   List<Widget> additionalTextFields = [];
   List<TextEditingController> personTextControllers = [];
-
+  List<Homes> homes = [];
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Home'),
@@ -188,9 +187,16 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
               }
               String homname = homnametext.text;
               Homes a = Homes(evIsmi: homname,insanListesi: people,);
+
+              homes.add(a);
               for(int z=0; z<a.insanListesi.length;z++){
                 print(a.evIsmi);
                 print(a.insanListesi[z]);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                         AfterAddHomeScreen(list: homes,)));
               }
             },
                 child: Text("Print"))
@@ -200,6 +206,8 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
     );
   }
 }
+
+
 
 
 
