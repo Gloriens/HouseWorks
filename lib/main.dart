@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -5,28 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:house/Homes.dart';
 import 'package:house/after_add_home_screen.dart';
 
-/*
-void main() {
-  runApp(const MyApp());
-}
-*/
-
-/*
-Future main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-
-  runApp(const MyApp());
-}
-*/
+import 'firebase_options.dart';
 
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  if(kIsWeb) {
-    await Firebase.initializeApp(options: FirebaseOptions(apiKey: "AIzaSyBYWv3Gu03a32oLYKz0sYen2N3P-rZzjTQ", appId: "1:760700497317:web:d0b67534a2e52d38198c4c", messagingSenderId: "760700497317", projectId: "fir-connect-fb93c"));
-  }
 
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
   runApp(const MyApp());
 }
 
@@ -85,6 +70,43 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<dynamic> RetrieveHome() async {
+    final CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection('Homes');
+
+    QuerySnapshot querySnapshot =
+    await usersCollection.get();
+
+    // Her belgeyi gez ve veri eklemeyi gerçekleştir
+    for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
+      // Belge ID'sini al
+      String documentId = documentSnapshot.id;
+
+      // Belge içeriğini al
+      Map<String, dynamic> existingData =
+      documentSnapshot.data() as Map<String, dynamic>;
+
+      print(existingData['HomeName']);
+      print(existingData['HouseWork']);
+      print(existingData['NoOfPeople']);
+
+      existingData['HomeName'] = 'House of JC';
+
+      // Belgeyi güncelle
+      await usersCollection.doc(documentId).set(existingData);
+
+
+    }
+
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    RetrieveHome();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +140,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 }
-
 
 class AddHomeScreen extends StatefulWidget {
   @override

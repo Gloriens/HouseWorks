@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "760700497317",
+    "firebase_url": "https://fir-connect-fb93c-default-rtdb.firebaseio.com",
     "project_id": "fir-connect-fb93c",
     "storage_bucket": "fir-connect-fb93c.appspot.com"
   },
