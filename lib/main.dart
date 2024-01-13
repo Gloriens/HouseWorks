@@ -1,4 +1,4 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:house/Homes.dart';
@@ -62,8 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
-<<<<<<< Updated upstream
-=======
 
   Future<dynamic> RetrieveHome() async {
     final CollectionReference usersCollection =
@@ -99,7 +97,6 @@ class _MyHomePageState extends State<MyHomePage> {
     RetrieveHome();
   }
 
->>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,9 +211,3 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
     );
   }
 }
-<<<<<<< Updated upstream
-
-
-
-=======
->>>>>>> Stashed changes
