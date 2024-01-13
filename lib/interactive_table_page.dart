@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:house/Homes.dart';
+
+class Housework {
+  String housework = '';
+  String whoDidIt = '';
+}
 
 class InteractiveTablePage extends StatefulWidget {
   final Homes home;
@@ -30,6 +36,15 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Call the function to save houseworks to Firebase
+          saveHouseworksToFirebase();
+        },
+        child: Icon(Icons.save),
+        backgroundColor: Colors.blue, // Customize the color if needed
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -48,7 +63,6 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
             ),
           ),
         ),
-        // Table rows for housework input
         TableRow(
           children: List.generate(
             7,
@@ -66,7 +80,6 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
   Widget buildHouseworkSection(int dayIndex) {
     return Column(
       children: [
-        // Add necessary logic for handling housework input
         ...houseworksByDay[dayIndex].map((housework) {
           return Column(
             children: [
@@ -74,7 +87,6 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
                 decoration: InputDecoration(labelText: 'Housework'),
                 controller: TextEditingController(text: housework.housework),
                 onChanged: (value) {
-                  // Update the housework value in the list
                   housework.housework = value;
                 },
               ),
@@ -83,7 +95,6 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
                 decoration: InputDecoration(labelText: 'Who did it?'),
                 controller: TextEditingController(text: housework.whoDidIt),
                 onChanged: (value) {
-                  // Update the whoDidIt value in the list
                   housework.whoDidIt = value;
                 },
               ),
@@ -91,10 +102,8 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
             ],
           );
         }).toList(),
-        // Button to add more houseworks for the day
         ElevatedButton(
           onPressed: () {
-            // Add a new empty housework section to the list
             setState(() {
               houseworksByDay[dayIndex].add(Housework());
             });
@@ -104,9 +113,28 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
       ],
     );
   }
-}
 
-class Housework {
-  String housework = '';
-  String whoDidIt = '';
+  void saveHouseworksToFirebase() async {
+    final CollectionReference houseworksCollection =
+    FirebaseFirestore.instance.collection('Houseworks');
+
+    for (int dayIndex = 0; dayIndex < houseworksByDay.length; dayIndex++) {
+      for (int houseworkIndex = 0;
+      houseworkIndex < houseworksByDay[dayIndex].length;
+      houseworkIndex++) {
+        Housework housework = houseworksByDay[dayIndex][houseworkIndex];
+
+        // Save housework to Firebase
+        await houseworksCollection.add({
+          'dayIndex': dayIndex,
+          'housework': housework.housework,
+          'whoDidIt': housework.whoDidIt,
+        });
+      }
+    }
+
+    // After saving, navigate back to the home page
+    Navigator.pop(context);
+  }
+
 }
