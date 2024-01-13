@@ -1,9 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:house/Homes.dart';
+import 'package:house/after_add_home_screen.dart';
 
-void main() {
+import 'firebase_options.dart';
+
+Future main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
   runApp(const MyApp());
 }
 
@@ -41,7 +49,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
 
   final String title;
 
@@ -87,7 +94,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Belgeyi güncelle
       await usersCollection.doc(documentId).set(existingData);
+
+
     }
+
   }
 
   @override
@@ -131,7 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-
 class AddHomeScreen extends StatefulWidget {
   @override
   _AddHomeScreenState createState() => _AddHomeScreenState();
@@ -142,9 +151,10 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
   TextEditingController peoplecounttext = TextEditingController();
   List<Widget> additionalTextFields = [];
   List<TextEditingController> personTextControllers = [];
-
+  List<Homes> homes = [];
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Home'),
@@ -176,11 +186,10 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
                   peopleCount,
                       (index) => TextField(
                     decoration: InputDecoration(labelText: 'Person ${index + 1}'),
-                        controller: personTextControllers[index],
+                    controller: personTextControllers[index],
 
                   ),
                 );
-
 
                 setState(() {
                   additionalTextFields = newTextFields;
@@ -199,9 +208,16 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
               }
               String homname = homnametext.text;
               Homes a = Homes(evIsmi: homname,insanListesi: people,);
+
+              homes.add(a);
               for(int z=0; z<a.insanListesi.length;z++){
                 print(a.evIsmi);
                 print(a.insanListesi[z]);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            AfterAddHomeScreen(list: homes,)));
               }
             },
                 child: Text("Print"))
@@ -211,3 +227,7 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
     );
   }
 }
+
+
+
+
