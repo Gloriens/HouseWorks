@@ -62,6 +62,44 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+<<<<<<< Updated upstream
+=======
+
+  Future<dynamic> RetrieveHome() async {
+    final CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection('Homes');
+
+    QuerySnapshot querySnapshot =
+    await usersCollection.get();
+
+    // Her belgeyi gez ve veri eklemeyi gerçekleştir
+    for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
+      // Belge ID'sini al
+      String documentId = documentSnapshot.id;
+
+      // Belge içeriğini al
+      Map<String, dynamic> existingData =
+      documentSnapshot.data() as Map<String, dynamic>;
+
+      print(existingData['HomeName']);
+      print(existingData['HouseWork']);
+      print(existingData['NoOfPeople']);
+
+      existingData['HomeName'] = 'House of JC';
+
+      // Belgeyi güncelle
+      await usersCollection.doc(documentId).set(existingData);
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    RetrieveHome();
+  }
+
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,6 +214,9 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
     );
   }
 }
+<<<<<<< Updated upstream
 
 
 
+=======
+>>>>>>> Stashed changes
