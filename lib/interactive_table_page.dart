@@ -23,6 +23,43 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
   List<List<Housework>> houseworksByDay = List.generate(7, (index) => []);
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.home.id != null) {
+      fetchHouseworksForHome(widget.home.id);
+    }
+  }
+
+  Future<void> fetchHouseworksForHome(int? id) async {
+    final CollectionReference houseworksCollection =
+    FirebaseFirestore.instance.collection('Houseworks');
+
+    QuerySnapshot querySnapshot = await houseworksCollection
+        .where('homeId', isEqualTo: widget.home.id)
+        .get();
+
+    if (houseworksByDay.isEmpty) {
+      houseworksByDay = List.generate(7, (index) => []);
+    }
+
+    for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
+      Map<String, dynamic> houseworkData =
+      documentSnapshot.data() as Map<String, dynamic>;
+
+      Housework housework = Housework(
+        housework: houseworkData['housework'] ?? '',
+        whoDidIt: houseworkData['whoDidIt'] ?? '',
+        id: null,
+      );
+
+      int dayIndex = houseworkData['day'] - 1; // subtract 1 to match the day indexing
+      houseworksByDay[dayIndex].add(housework);
+    }
+
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -40,11 +77,13 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Call the function to save houseworks to Firebase
+          // Save houseworks to Firebase
           saveHouseworksToFirebase();
+
+          Navigator.pop(context);
         },
         child: Icon(Icons.save),
-        backgroundColor: Colors.blue, // Customize the color if needed
+        backgroundColor: Colors.blue,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -80,6 +119,8 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
   }
 
   Widget buildHouseworkSection(int dayIndex) {
+    List<String> peopleList = widget.home.insanListesi;
+
     return Column(
       children: [
         ...houseworksByDay[dayIndex].map((housework) {
@@ -93,12 +134,20 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
                 },
               ),
               SizedBox(height: 8),
-              TextField(
-                decoration: InputDecoration(labelText: 'Who did it?'),
-                controller: TextEditingController(text: housework.whoDidIt),
-                onChanged: (value) {
-                  housework.whoDidIt = value;
+              DropdownButtonFormField<String>(
+                value: housework.whoDidIt,
+                onChanged: (newValue) {
+                  setState(() {
+                    housework.whoDidIt = newValue!;
+                  });
                 },
+                items: peopleList.map((person) {
+                  return DropdownMenuItem(
+                    value: person,
+                    child: Text(person),
+                  );
+                }).toList(),
+                decoration: InputDecoration(labelText: 'Who did it?'),
               ),
               SizedBox(height: 8),
             ],
@@ -110,7 +159,7 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
               houseworksByDay[dayIndex].add(Housework(
                   id: DateTime.now().millisecondsSinceEpoch,
                   housework: '',
-                  whoDidIt: '',
+                  whoDidIt: peopleList.isNotEmpty ? peopleList[0] : '',
               ));
             });
           },
@@ -132,15 +181,12 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
 
         // Save housework to Firebase
         await houseworksCollection.add({
+          'homeId': widget.home.id,
           'day': dayIndex+1, // we add plus 1 to make it look like day 1 instead of day 0
           'housework': housework.housework,
           'whoDidIt': housework.whoDidIt,
         });
       }
     }
-
-    // After saving, navigate back to the home page
-    Navigator.pop(context);
   }
-
 }

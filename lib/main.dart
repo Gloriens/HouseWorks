@@ -61,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   List<Homes> homesList = [];
 
+  /*
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -71,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+   */
 
   Future<dynamic> RetrieveHome() async {
     final CollectionReference usersCollection =
@@ -88,11 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
       Map<String, dynamic> existingData =
       documentSnapshot.data() as Map<String, dynamic>;
 
-      print(existingData['HomeName']);
-      print(existingData['HouseWork']);
-      print(existingData['NoOfPeople']);
+      print(existingData['evIsmi']);
+      // print(existingData['HouseWork']);
+      print(existingData['insanListesi']);
 
-      existingData['HomeName'] = 'House of JC';
+      // existingData['evIsmi'] = 'House of JC';
 
       // Belgeyi güncelle
       await usersCollection.doc(documentId).set(existingData);
@@ -125,6 +127,32 @@ class _MyHomePageState extends State<MyHomePage> {
       homesList.add(home);
       currentId++;
     }
+
+    setState(() {});
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AfterAddHomeScreen(list: homesList),
+      ),
+    );
+  }
+
+  Future<void> addHomeToFirestore(Homes home) async {
+    try {
+      final CollectionReference homesCollection =
+      FirebaseFirestore.instance.collection('Homes');
+
+      // Add a new document to the 'Homes' collection
+      await homesCollection.add({
+        'evIsmi': home.evIsmi,
+        'insanListesi': home.insanListesi,
+      });
+
+      print('A new home is added to Firestore successfully.');
+    } catch (e) {
+      print('Error adding home to Firestore: $e');
+    }
   }
 
   Future<List<Housework>> fetchHouseworksForInteractiveTable(String homeId) async {
@@ -153,6 +181,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return houseworks;
   }
 
+  Future<void> deleteHome(String homeId) async {
+    final CollectionReference homesCollection =
+    FirebaseFirestore.instance.collection('Homes');
+
+    // Delete home from the database
+    await homesCollection.doc(homeId).delete();
+
+    // Remove home from the app (local list of homes)
+    homesList.removeWhere((home) => home.id == homeId);
+
+    // Update the state to trigger a rebuild
+    setState(() {});
+  }
+
+
   @override
   void initState() {
     // TODO: implement initState
@@ -176,7 +219,14 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddHomeScreen(homes: [],)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AddHomeScreen(
+                    homes: [],
+                  )
+              )
+          );
         },
         child: Icon(Icons.add),
       ),
@@ -206,9 +256,9 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
   List<Widget> additionalTextFields = [];
   List<TextEditingController> personTextControllers = [];
   List<Homes> homes = [];
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Home'),
@@ -229,8 +279,9 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             SizedBox(height: 20),
+
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 int peopleCount = int.tryParse(peoplecounttext.text) ?? 0;
                 personTextControllers = List.generate(peopleCount, (index) => TextEditingController());
                 //personTextControllers diye texteditingcontroller dan oluşan bir list yarattık. Şimdi ise o liste
@@ -241,7 +292,6 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
                       (index) => TextField(
                     decoration: InputDecoration(labelText: 'Person ${index + 1}'),
                     controller: personTextControllers[index],
-
                   ),
                 );
 
@@ -253,26 +303,28 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
             ),
             ...additionalTextFields,
 
-            ElevatedButton(onPressed: (){
+            ElevatedButton(onPressed: () async {
               int peopleCount = int.tryParse(peoplecounttext.text) ?? 0;
               List<String> people = [];
               for(int i =0;i<peopleCount;i++){
                 people.add(personTextControllers[i].text);
-
               }
+
               String homname = homnametext.text;
-              Homes a = Homes(evIsmi: homname,insanListesi: people,);
+              Homes newHome = Homes(evIsmi: homname, insanListesi: people);
 
-              homes.add(a);
-              for(int z=0; z<a.insanListesi.length;z++){
-                print(a.evIsmi);
-                print(a.insanListesi[z]);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            AfterAddHomeScreen(list: homes,)));
-              }
+              // add a new home to the database
+              await _MyHomePageState().addHomeToFirestore(newHome);
+
+              // fetch the updated home list from the database
+              await _MyHomePageState().fetchHomesFromFirebase();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AfterAddHomeScreen(list: _MyHomePageState().homesList),
+                ),
+              );
             },
                 child: Text("Print"))
           ],
