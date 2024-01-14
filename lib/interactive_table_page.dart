@@ -162,7 +162,10 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
 
     return Column(
       children: [
-        ...houseworksByDay[dayIndex].map((housework) {
+        ...houseworksByDay[dayIndex].asMap().entries.map((entry) {
+          int index = entry.key;
+          Housework housework = entry.value;
+
           return Column(
             children: [
               TextField(
@@ -189,6 +192,15 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
                 decoration: InputDecoration(labelText: 'Who did it?'),
               ),
               SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    houseworksByDay[dayIndex].removeAt(index);
+                  });
+                },
+                child: Text('- Remove Housework'),
+              ),
+              SizedBox(height: 8),
             ],
           );
         }).toList(),
@@ -196,9 +208,9 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
           onPressed: () {
             setState(() {
               houseworksByDay[dayIndex].add(Housework(
-                  id: DateTime.now().millisecondsSinceEpoch,
-                  housework: '',
-                  whoDidIt: peopleList.isNotEmpty ? peopleList[0] : '',
+                id: DateTime.now().millisecondsSinceEpoch,
+                housework: '',
+                whoDidIt: peopleList.isNotEmpty ? peopleList[0] : '',
               ));
             });
           },
@@ -207,6 +219,7 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
       ],
     );
   }
+
 
   void saveHouseworksToFirebase() async {
     final CollectionReference houseworksCollection =
