@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 class Homes extends StatefulWidget {
   String evIsmi;
   List<String> insanListesi;
+  int? id;
 
-  Homes({Key? key, required this.evIsmi, required this.insanListesi}) : super(key: key);
+  Homes({required this.evIsmi, required this.insanListesi, this.id});
 
   @override
   State<Homes> createState() => _HomesState();

@@ -53,7 +53,7 @@ class _AfterAddHomeScreenState extends State<AfterAddHomeScreen> {
                           onPressed: () async {
                             final newHomes = await Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => AddHomeScreen()),
+                              MaterialPageRoute(builder: (context) => AddHomeScreen(homes: const [],)),
                             );
                             if (newHomes != null && newHomes is List<Homes>) {
                               setState(() {

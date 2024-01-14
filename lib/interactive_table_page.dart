@@ -5,12 +5,14 @@ import 'package:house/Homes.dart';
 class Housework {
   String housework = '';
   String whoDidIt = '';
+  int? id;
+  Housework({required this.id, required this.housework, required this.whoDidIt});
 }
+
 
 class InteractiveTablePage extends StatefulWidget {
   final Homes home;
-
-  const InteractiveTablePage({Key? key, required this.home}) : super(key: key);
+  const InteractiveTablePage({super.key, required this.home});
 
   @override
   _InteractiveTablePageState createState() => _InteractiveTablePageState();
@@ -105,7 +107,11 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
         ElevatedButton(
           onPressed: () {
             setState(() {
-              houseworksByDay[dayIndex].add(Housework());
+              houseworksByDay[dayIndex].add(Housework(
+                  id: DateTime.now().millisecondsSinceEpoch,
+                  housework: '',
+                  whoDidIt: '',
+              ));
             });
           },
           child: Text('+ Add Housework'),
@@ -126,7 +132,7 @@ class _InteractiveTablePageState extends State<InteractiveTablePage> {
 
         // Save housework to Firebase
         await houseworksCollection.add({
-          'dayIndex': dayIndex,
+          'day': dayIndex+1, // we add plus 1 to make it look like day 1 instead of day 0
           'housework': housework.housework,
           'whoDidIt': housework.whoDidIt,
         });

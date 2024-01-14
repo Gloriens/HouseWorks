@@ -4,11 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:house/Homes.dart';
+import 'package:house/homes/home_cards_list.dart';
 import 'package:house/after_add_home_screen.dart';
-
+import 'package:house/interactive_table_page.dart';
 import 'firebase_options.dart';
 
-Future main() async{
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
@@ -58,6 +59,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  List<Homes> homesList = [];
 
   void _incrementCounter() {
     setState(() {
@@ -97,11 +99,66 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> fetchHomesFromFirebase() async {
+    final CollectionReference homesCollection =
+    FirebaseFirestore.instance.collection('Homes');
+
+    QuerySnapshot querySnapshot = await homesCollection.get();
+
+    homesList.clear();
+
+    int currentId = 1;
+
+    for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
+      Map<String, dynamic> homeData =
+      documentSnapshot.data() as Map<String, dynamic>;
+
+      List<String> peopleList =
+      List<String>.from(homeData['insanListesi'] ?? []);
+
+      Homes home = Homes(
+        evIsmi: homeData['evIsmi'] ?? '',
+        insanListesi: peopleList,
+        id: currentId,
+      );
+
+      homesList.add(home);
+      currentId++;
+    }
+  }
+
+  Future<List<Housework>> fetchHouseworksForInteractiveTable(String homeId) async {
+    final CollectionReference houseworksCollection =
+    FirebaseFirestore.instance.collection('Houseworks');
+
+    QuerySnapshot querySnapshot = await houseworksCollection
+        .where('homeId', isEqualTo: homeId)
+        .get();
+
+    List<Housework> houseworks = [];
+
+    for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
+      Map<String, dynamic> houseworkData =
+      documentSnapshot.data() as Map<String, dynamic>;
+
+      Housework housework = Housework(
+        housework: houseworkData['housework'] ?? '',
+        whoDidIt: houseworkData['whoDidIt'] ?? '',
+        id: null,
+      );
+
+      houseworks.add(housework);
+    }
+
+    return houseworks;
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     RetrieveHome();
+    fetchHomesFromFirebase();
   }
 
   @override
@@ -114,16 +171,14 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.only(top: 180.0), // İstediğiniz miktarda yukarı çekmek için yukarı boşluk ekledik
-
+          child: HomeCardsList(homesList: homesList),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddHomeScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddHomeScreen(homes: [],)));
         },
-        child: Icon(Icons.add), // Ikon eklemek için bu satırı kullanın
-        // veya
-        // child: Icon(CupertinoIcons.add), // Cupertino ikonu eklemek için bu satırı kullanın
+        child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Sağ alt köşede görünecek
       resizeToAvoidBottomInset: false,
@@ -131,14 +186,16 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 40.0,
         color: Color(0xFF8a2be2),
         shape: CircularNotchedRectangle(),
-
       ),
     );
-
   }
+
 }
 
 class AddHomeScreen extends StatefulWidget {
+  final List<Homes> homes;
+  AddHomeScreen({required this.homes});
+
   @override
   _AddHomeScreenState createState() => _AddHomeScreenState();
 }
@@ -224,7 +281,3 @@ class _AddHomeScreenState extends State<AddHomeScreen> {
     );
   }
 }
-
-
-
-
