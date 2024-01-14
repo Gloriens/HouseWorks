@@ -9,7 +9,6 @@ class Housework {
   Housework({required this.id, required this.housework, required this.whoDidIt});
 }
 
-
 class InteractiveTablePage extends StatefulWidget {
   final Homes home;
   const InteractiveTablePage({super.key, required this.home});
@@ -19,15 +18,55 @@ class InteractiveTablePage extends StatefulWidget {
 }
 
 class _InteractiveTablePageState extends State<InteractiveTablePage> {
-  // List of houseworks for each day
+  // list of houseworks for each day
   List<List<Housework>> houseworksByDay = List.generate(7, (index) => []);
 
   @override
   void initState() {
     super.initState();
     if (widget.home.id != null) {
+      checkAndClearTableForNewWeek();
       fetchHouseworksForHome(widget.home.id);
     }
+  }
+
+  Future<void> checkAndClearTableForNewWeek() async {
+    bool isNewWeek = await isNewWeekStarted();
+
+    if (isNewWeek) {
+      // clear the table
+      clearTable();
+    }
+  }
+
+  void clearTable() {
+    setState(() {
+      // clear the houseworksByDay list
+      houseworksByDay = List.generate(7, (index) => []);
+    });
+  }
+
+  Future<bool> isNewWeekStarted() async {
+    final CollectionReference houseworksCollection =
+    FirebaseFirestore.instance.collection('Houseworks');
+
+    QuerySnapshot querySnapshot = await houseworksCollection
+        .where('homeId', isEqualTo: widget.home.id)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DateTime lastEntryDate =
+      DateTime.fromMillisecondsSinceEpoch(querySnapshot.docs.first['timestamp']);
+      DateTime currentDate = DateTime.now();
+
+      // check if the current date is after the last entry date (which means if a new week has started)
+      return currentDate.isAfter(lastEntryDate);
+    }
+
+    // if there is no previous entries, consider it as a new week
+    return true;
   }
 
   Future<void> fetchHouseworksForHome(int? id) async {
